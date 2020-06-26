@@ -1,4 +1,4 @@
-# Learning Vulkan
+# Learning Vulkan：《Vulkan 学习指南》
 
 <img src="./images/LearningVulkan.PNG" alt="Learning Vulkan" height="256px" align="right">
 
@@ -6,7 +6,7 @@ This is the code repository for [Learning Vulkan](https://www.packtpub.com/appli
 
 这个代码仓是用于《Vulkan 学习指南》。
 
-## About the Book
+## About the Book：关于本书
 Vulkan, the next generation graphics and compute API, is the latest offering by Khronos. This API is the successor of OpenGL and in contrast offers greatflexibility and high performance capabilities to control modern GPU devices. With this book, you'll get great insights into the working of Vulkan and how you can make stunning graphics run with minimum hardware requirements.
 
 ## Instructions and Navigations
