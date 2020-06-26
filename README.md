@@ -36,13 +36,19 @@ Please follow through the hardware and software requirements provided with this 
 
 This chapter begins with the fundamentals of the Vulkan API and provides an overview of all its distinct features compared to its predecessor OpenGL API. This chapter will cover the basics, concepts, application model, and technical jargon used in Vulkan programming that is extremely helpful for first-time learners. You will also walk through the Vulkan programming model and see an outline of each module and its role.
 
+本章从Vulkan API基础知识开始，讲述其与OpenGL的区别。本章会涵盖基础知识和概念，应用模型和专业术语，这些对初学者非常有用。您将学习Vulkan的编程模型，了解其作用。
+
 ### Chapter 2, Your First Vulkan Pseudo Program：你的第一个Vulkan伪代码
 
 This chapter will help you program a simple Hello World program using a pseudocode approach. This will help the beginners to get a flavor of Vulkan programming and learn the step-by-step process to build their first Vulkan application. You will also learn how to install the necessary software and the SDK.
 
+本章使用伪代码编写Vulkan中的Hello World程序。这也将帮助初学者熟悉Vulkan编程，并逐步学习如何构建第一个Vulkan应用程序。还要学会如何安装SDK和必要软件包依赖。
+
 ### Chapter 3, Shaking Hands with the Device：与硬件设备握手
 
 Will help you to set up the programming environment to start with building your very first Vulkan example. You will create the Vulkan instance and initialize the program. You will connect with the physical hardware device, explore different types of queues exposed by it, and query various available layers and extensions. This chapter will provide a detailed understanding of the device queue and queue family concept and its relation with logical devices.
+
+设置环境变量，开始构建第一个Vulkan程序。您建初始化Vulkan实例，然后初始化程序。连接物理设备（GPU显卡设备），查询设备所支持的队列、可用层和扩展。本章将详细解释设备队列和队列族概念及其逻辑设备的关系。
 
 ### Chapter 4, Debugging in Vulkan：调试Vulkan程序
 
