@@ -76,15 +76,15 @@ This chapter describes, how to update shader resources from a Vulkan application
 
 Will bring realism to our rendered 3D drawing object by adding textures. You will learn how to create the image resource and apply samplers to it. You will also learn how to apply textures using linear and optimal tiling. In optimal tiling implementation, you will learn to transfer buffer and image memory through staging.
 
-## Related Products
+## Related Products：相关产品
 * [Vulkan Cookbook](https://www.packtpub.com/game-development/vulkan-cookbook?utm_source=github&utm_medium=repository&utm_campaign=9781786468154)
 
 * [OpenGL 4 Shading Language Cookbook, Second Edition](https://www.packtpub.com/game-development/opengl-4-shading-language-cookbook-second-edition?utm_source=github&utm_medium=repository&utm_campaign=9781782167020)
 
 * [OpenGL Development Cookbook](https://www.packtpub.com/game-development/opengl-development-cookbook?utm_source=github&utm_medium=repository&utm_campaign=9781849695046)
 
-## Other books by the author
+## Other books by the author：作者的其他书籍
 * [OpenGLES 3.0 Cookbook](https://www.packtpub.com/application-development/opengl-es-30-cookbook)
 
-### Suggestions and Feedback
+### Suggestions and Feedback：建议与反馈
 [Click here](https://docs.google.com/forms/d/e/1FAIpQLSe5qwunkGf6PUvzPirPDtuy1Du5Rlzew23UBp2S-P3wB-GcwQ/viewform) if you have any feedback or suggestions.
