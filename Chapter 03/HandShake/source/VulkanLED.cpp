@@ -1,27 +1,3 @@
-/*
-* Learning Vulkan - ISBN: 9781786469809
-*
-* Author: Parminder Singh, parminder.vulkan@gmail.com
-* Linkedin: https://www.linkedin.com/in/parmindersingh18
-*
-* Permission is hereby granted, free of charge, to any person obtaining a
-* copy of this software and associated documentation files (the "Software"),
-* to deal in the Software without restriction, including without limitation
-* the rights to use, copy, modify, merge, publish, distribute, sublicense,
-* and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included
-* in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-* DEALINGS IN THE SOFTWARE.
-*/
 
 #include "VulkanLED.h"
 #include "VulkanApplication.h"
@@ -36,34 +12,39 @@ VulkanLayerAndExtension::~VulkanLayerAndExtension()
 
 VkResult VulkanLayerAndExtension::getInstanceLayerProperties()
 {
-	uint32_t						instanceLayerCount;		// Stores number of layers supported by instance
-	std::vector<VkLayerProperties>	layerProperties;		// Vector to store layer properties
-	VkResult						result;					// Variable to check Vulkan API result status
+	uint32_t						instanceLayerCount;		// 存储实例层的数目
+	std::vector<VkLayerProperties>	layerProperties;		// 通过向量数组存储层的属性
+	VkResult						result;					// 检查Vulkan API的执行结果
 
-	// Query all the layers
+	// 查询所有的层
 	do {
 		result = vkEnumerateInstanceLayerProperties(&instanceLayerCount, NULL);
 
 		if (result)
+		{
 			return result;
+		}
 
 		if (instanceLayerCount == 0)
-			return VK_INCOMPLETE; // return fail
+		{
+			return VK_INCOMPLETE; // 获取失败
+		}
 
 		layerProperties.resize(instanceLayerCount);
 		result = vkEnumerateInstanceLayerProperties(&instanceLayerCount, layerProperties.data());
 	} while (result == VK_INCOMPLETE);
 
-	// Query all the extensions for each layer and store it.
+	// 查询每个层的所有扩展信息，并进行保存
 	std::cout << "\nInstanced Layers" << std::endl;
 	std::cout << "===================" << std::endl;
 	for (auto globalLayerProp: layerProperties) {
+		// 显示层的名字和描述信息
 		std::cout <<"\n"<< globalLayerProp.description <<"\n\t|\n\t|---[Layer Name]--> " << globalLayerProp.layerName <<"\n";
 
 		LayerProperties layerProps;
 		layerProps.properties = globalLayerProp;
 
-		// Get Instance level extensions for corresponding layer properties
+		// 根据层属性信息，获取基于实例的扩展
 		result = getExtensionProperties(layerProps);
 
 		if (result){
@@ -71,7 +52,8 @@ VkResult VulkanLayerAndExtension::getInstanceLayerProperties()
 		}
 
 		layerPropertyList.push_back(layerProps);
-		// Print extension name for each instance layer
+		// 显示每个实例层的扩展名称
+		// 每个层都可以支持一个或者多个扩展
 		for (auto j : layerProps.extensions) {
 			std::cout << "\t\t|\n\t\t|---[Layer Extension]--> " << j.extensionName << "\n";
 		}
@@ -80,14 +62,13 @@ VkResult VulkanLayerAndExtension::getInstanceLayerProperties()
 }
 
 /*
-* Get the device extensions
+* 获取基于设备的扩展
 */
- 
 VkResult VulkanLayerAndExtension::getDeviceExtensionProperties(VkPhysicalDevice* gpu)
 {
-	VkResult						result;					// Variable to check Vulkan API result status
+	VkResult						result;					// 检查Vulkan API的执行结果
 
-	// Query all the extensions for each layer and store it.
+	// 查询每个层的所有扩展信息，并进行保存
 	std::cout << "Device extensions" << std::endl;
 	std::cout << "===================" << std::endl;
 	VulkanApplication* appObj = VulkanApplication::GetInstance();
@@ -114,35 +95,43 @@ VkResult VulkanLayerAndExtension::getDeviceExtensionProperties(VkPhysicalDevice*
 	return result;
 }
 
-// This function retrieves extension and its properties at instance 
-// and device level. Pass a valid physical device
-// pointer to retrieve device level extensions, otherwise
-// use NULL to retrieve extension specific to instance level.
+// 这个函数可以获取基于实例或者设备的扩展以及它们的属性信息
+// 传入一个合法的物理设备指针gpu，即可获取基于物理设备的扩展
+// 传入NULL得到的就是基于实例的扩展了
 VkResult VulkanLayerAndExtension::getExtensionProperties(LayerProperties &layerProps, VkPhysicalDevice* gpu)
 {
-	uint32_t	extensionCount;								 // Stores number of extension per layer
-	VkResult	result;										 // Variable to check Vulkan API result status
-	char*		layerName = layerProps.properties.layerName; // Name of the layer 
+	uint32_t	extensionCount;								 // 保存每一层的扩展总数
+	VkResult	result;										 // 检查Vulkan API的执行结果
+	char*		layerName = layerProps.properties.layerName; // 层的名字
 
 	do {
-		// Get the total number of extension in this layer
-		if(gpu)
+		// 获取当前层中的扩展的总数
+		if (gpu)
+		{
 			result = vkEnumerateDeviceExtensionProperties(*gpu, layerName, &extensionCount, NULL);
+		}
 		else
+		{
 			result = vkEnumerateInstanceExtensionProperties(layerName, &extensionCount, NULL);
+		}
 
 		if (result || extensionCount == 0)
+		{
 			continue;
+		}
 
 		layerProps.extensions.resize(extensionCount);
 
-		// Gather all extension properties 
+		// 获取所有的扩展属性
 		if (gpu)
+		{
 			result = vkEnumerateDeviceExtensionProperties(*gpu, layerName, &extensionCount, layerProps.extensions.data());
+		}
 		else
+		{
 			result = vkEnumerateInstanceExtensionProperties(layerName, &extensionCount, layerProps.extensions.data());
+		}
 	} while (result == VK_INCOMPLETE);
 
 	return result;
 }
-
