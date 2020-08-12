@@ -30,6 +30,10 @@ Please follow through the hardware and software requirements provided with this 
 
 请遵循本书的硬件和软件要求：读者需要对C++编程有经验。
 
+## 编译
+```
+ cmake.exe -G "Visual Studio 15 2017 Win64" ..
+```
 ## Preface：前言
 
 ### Chapter 1, Getting Started with the NextGen 3D Graphics API：开始学习新一代3D图形API
