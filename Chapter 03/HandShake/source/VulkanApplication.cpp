@@ -1,28 +1,3 @@
-/*
-* Learning Vulkan - ISBN: 9781786469809
-*
-* Author: Parminder Singh, parminder.vulkan@gmail.com
-* Linkedin: https://www.linkedin.com/in/parmindersingh18
-*
-* Permission is hereby granted, free of charge, to any person obtaining a
-* copy of this software and associated documentation files (the "Software"),
-* to deal in the Software without restriction, including without limitation
-* the rights to use, copy, modify, merge, publish, distribute, sublicense,
-* and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included
-* in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-* DEALINGS IN THE SOFTWARE.
-*/
-
 #include "VulkanApplication.h"
 
 std::unique_ptr<VulkanApplication> VulkanApplication::instance;
@@ -33,10 +8,10 @@ extern std::vector<const char *> layerNames;
 extern std::vector<const char *> deviceExtensionNames;
 
 
-// Application constructor responsible for layer enumeration.
+// 类的构造函数负责枚举层
 VulkanApplication::VulkanApplication() 
 {
-	// At application start up, enumerate instance layers
+	// 应用程序启动时，开始枚举实例层
 	instanceObj.layerExtension.getInstanceLayerProperties();
 
 	deviceObj = NULL;
@@ -47,12 +22,13 @@ VulkanApplication::~VulkanApplication()
 
 }
 
-// Returns the Single ton object of VulkanApplication
+// 返回VulkanApplication的单例对象
 VulkanApplication* VulkanApplication::GetInstance(){
     std::call_once(onlyOnce, [](){instance.reset(new VulkanApplication()); });
     return instance.get();
 }
 
+// 用于创建Vulkan实例的成员函数
 VkResult VulkanApplication::createVulkanInstance( std::vector<const char *>& layers, std::vector<const char *>& extensionNames, const char* applicationName)
 {
 	return instanceObj.createInstance(layers, extensionNames, applicationName);
@@ -69,40 +45,42 @@ VkResult VulkanApplication::createVulkanInstance( std::vector<const char *>& lay
 // 7. Get the handle of graphics queue
 // 8. Create the logical device, connect it to the graphics queue.
 
-// High level function for creating device and queues
+// 用于创建设备和队列的高级封装函数
 VkResult VulkanApplication::handShakeWithDevice(VkPhysicalDevice* gpu, std::vector<const char *>& layers, std::vector<const char *>& extensions )
 {
 
-	// The user define Vulkan Device object this will manage the
-	// Physical and logical device and their queue and properties
+	// 用户定义了Vulkan的设备对象
+	// 它负责管理物理设备和逻辑设备，也负责管理它所包含的队列和属性
 	deviceObj = new VulkanDevice(gpu);
 	if (!deviceObj){
 		return VK_ERROR_OUT_OF_HOST_MEMORY;
 	}
 	
-	// Print the devices available layer and their extension 
+	// 打印设备端可用的层以及它们的扩展信息
 	deviceObj->layerExtension.getDeviceExtensionProperties(gpu);
 
-	// Get the physical device or GPU properties
+	// 获取物理设备或GPU的属性
 	vkGetPhysicalDeviceProperties(*gpu, &deviceObj->gpuProps);
 
-	// Get the memory properties from the physical device or GPU.
+	// 获取物理设备或者GPU的内存属性
 	vkGetPhysicalDeviceMemoryProperties(*gpu, &deviceObj->memoryProperties);
 
-	// Query the availabe queues on the physical device and their properties.
+	// 查询物理设备端可用的队列并返回它们的属性
 	deviceObj->getPhysicalDeviceQueuesAndProperties();
 
-	// Retrive the queue which support graphics pipeline.
+	// 获取能够支持图形操作流水线的队列
 	deviceObj->getGraphicsQueueHandle();
 
-	// Create Logical Device, ensure that this device is connecte to graphics queue
+	// 创建逻辑设备，确保设备已经关联到一个图形队列当中了
 	return deviceObj->createDevice(layers, extensions);
 }
 
 VkResult VulkanApplication::enumeratePhysicalDevices(std::vector<VkPhysicalDevice>& gpuList)
 {
+	// 记录GPU的数量
 	uint32_t gpuDeviceCount;
 
+	// 获取GPU数量
 	VkResult result = vkEnumeratePhysicalDevices(instanceObj.instance, &gpuDeviceCount, NULL);
 	assert(result == VK_SUCCESS);
 
@@ -110,23 +88,25 @@ VkResult VulkanApplication::enumeratePhysicalDevices(std::vector<VkPhysicalDevic
 
 	gpuList.resize(gpuDeviceCount);
 
+	// 获取物理设备对象
 	result = vkEnumeratePhysicalDevices(instanceObj.instance, &gpuDeviceCount, gpuList.data());
 	assert(result == VK_SUCCESS);
 
 	return result;
 }
 
+// 应用程序的构造函数负责层的枚举
 void VulkanApplication::initialize()
 {
 	char title[] = "Hello World!!!";
-	// Create the Vulkan instance with specified layer and extension names.
+	// 创建Vulkan实例，并启用指定的层和扩展名称
 	createVulkanInstance(layerNames, instanceExtensionNames, title);
 
-	// Get the list of physical devices on the system
+	// 获取系统中物理设备的列表
 	std::vector<VkPhysicalDevice> gpuList;
 	enumeratePhysicalDevices(gpuList);
 
-	// This example use only one device which is available first.
+	// 这个例子中只使用第一个可用的物理设备
 	if (gpuList.size() > 0) {
 		handShakeWithDevice(&gpuList[0], layerNames, deviceExtensionNames);
 	}
@@ -153,5 +133,3 @@ bool VulkanApplication::render()
 	// Place holder, this will be utilized in the upcoming chapters
 	return true;
 }
-
-
