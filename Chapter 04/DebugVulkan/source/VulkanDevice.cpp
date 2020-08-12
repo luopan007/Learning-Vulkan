@@ -1,27 +1,3 @@
-/*
-* Learning Vulkan - ISBN: 9781786469809
-*
-* Author: Parminder Singh, parminder.vulkan@gmail.com
-* Linkedin: https://www.linkedin.com/in/parmindersingh18
-*
-* Permission is hereby granted, free of charge, to any person obtaining a
-* copy of this software and associated documentation files (the "Software"),
-* to deal in the Software without restriction, including without limitation
-* the rights to use, copy, modify, merge, publish, distribute, sublicense,
-* and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included
-* in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-* DEALINGS IN THE SOFTWARE.
-*/
 
 #include "VulkanDevice.h"
 #include "VulkanInstance.h"
@@ -47,10 +23,12 @@ VkResult VulkanDevice::createDevice(std::vector<const char *>& layers, std::vect
 
 	VkResult result;
 	float queuePriorities[1]			= { 0.0 };
-	VkDeviceQueueCreateInfo queueInfo	= {};
+	
+	// 创建对象的信息
+	VkDeviceQueueCreateInfo queueInfo	        = {};
 	queueInfo.queueFamilyIndex			= graphicsQueueIndex;  
-	queueInfo.sType						= VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	queueInfo.pNext						= NULL;
+	queueInfo.sType					= VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	queueInfo.pNext					= NULL;
 	queueInfo.queueCount				= 1;
 	queueInfo.pQueuePriorities			= queuePriorities;
 
@@ -60,10 +38,10 @@ VkResult VulkanDevice::createDevice(std::vector<const char *>& layers, std::vect
 	deviceInfo.queueCreateInfoCount		= 1;
 	deviceInfo.pQueueCreateInfos		= &queueInfo;
 	deviceInfo.enabledLayerCount		= 0;
-	deviceInfo.ppEnabledLayerNames		= NULL;											// Device layers are deprecated
+	deviceInfo.ppEnabledLayerNames		= NULL; // 设备的层属性信息已经被废弃
 	deviceInfo.enabledExtensionCount	= (uint32_t)extensions.size();
 	deviceInfo.ppEnabledExtensionNames	= extensions.size() ? extensions.data() : NULL;
-	deviceInfo.pEnabledFeatures			= NULL;
+	deviceInfo.pEnabledFeatures		= NULL;
 
 	result = vkCreateDevice(*gpu, &deviceInfo, NULL, &device);
 	assert(result == VK_SUCCESS);
@@ -73,46 +51,46 @@ VkResult VulkanDevice::createDevice(std::vector<const char *>& layers, std::vect
 
 void VulkanDevice::getPhysicalDeviceQueuesAndProperties()
 {
-	// Query queue families count with pass NULL as second parameter.
+	// 第二个参数传入NULL，从而查询队列族的数量
 	vkGetPhysicalDeviceQueueFamilyProperties(*gpu, &queueFamilyCount, NULL);
 	
-	// Allocate space to accomodate Queue properties.
+	// 分配数组空间保存队列属性信息
 	queueFamilyProps.resize(queueFamilyCount);
 
-	// Get queue family properties
+	// 获取队列族的属性
 	vkGetPhysicalDeviceQueueFamilyProperties(*gpu, &queueFamilyCount, queueFamilyProps.data());
 }
 
 uint32_t VulkanDevice::getGraphicsQueueHandle()
 {
-	//	1. Get the number of Queues supported by the Physical device
-	//	2. Get the properties each Queue type or Queue Family
-	//			There could be 4 Queue type or Queue families supported by physical device - 
-	//			Graphics Queue	- VK_QUEUE_GRAPHICS_BIT 
-	//			Compute Queue	- VK_QUEUE_COMPUTE_BIT
-	//			DMA				- VK_QUEUE_TRANSFER_BIT
-	//			Sparse memory	- VK_QUEUE_SPARSE_BINDING_BIT
-	//	3. Get the index ID for the required Queue family, this ID will act like a handle index to queue.
+	//	1. 迭代查找物理设备所支持的所有队列
+	//	2. 获取图形队列或队列族的类型
+	//			一共支持4种类型：
+	//			图形队列		- VK_QUEUE_GRAPHICS_BIT 
+	//			计算队列		- VK_QUEUE_COMPUTE_BIT
+	//			传输队列	        - VK_QUEUE_TRANSFER_BIT
+	//			稀疏队列		- VK_QUEUE_SPARSE_BINDING_BIT
+	//	3. 获取图形队列族的句柄或索引ID，这个ID将会在接下来的程序中使用
 
 	bool found = false;
-	// 1. Iterate number of Queues supported by the Physical device
+	// 1. 迭代查找物理设备所支持的所有队列
 	for (unsigned int i = 0; i < queueFamilyCount; i++){
-		// 2. Get the Graphics Queue type
-		//		There could be 4 Queue type or Queue families supported by physical device - 
-		//		Graphics Queue		- VK_QUEUE_GRAPHICS_BIT 
-		//		Compute Queue		- VK_QUEUE_COMPUTE_BIT
-		//		DMA/Transfer Queue	- VK_QUEUE_TRANSFER_BIT
-		//		Sparse memory		- VK_QUEUE_SPARSE_BINDING_BIT
+		// 2. 获取图形队列的类型
+		//		一共支持4种类型：
+		//		图形队列		- VK_QUEUE_GRAPHICS_BIT 
+		//		计算队列		- VK_QUEUE_COMPUTE_BIT
+		//		传输队列	        - VK_QUEUE_TRANSFER_BIT
+		//		稀疏队列		- VK_QUEUE_SPARSE_BINDING_BIT
 
 		if (queueFamilyProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT){
-			// 3. Get the handle/index ID of graphics queue family.
-			found				= true;
+			// 3. 获取图形队列族的句柄或索引ID
+			found			= true;
 			graphicsQueueIndex	= i;
 			break;
 		}
 	}
 
-	// Assert if there is no queue found.
+	// 检查是否有发现可用队列
 	assert(found);
 
 	return 0;
