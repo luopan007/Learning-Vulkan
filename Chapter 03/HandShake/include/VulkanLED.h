@@ -12,14 +12,14 @@ public:
 	VulkanLayerAndExtension();
 	~VulkanLayerAndExtension();
 
-	// 层列表
+	// 应用程序中所需要用到的层名称列表
 	std::vector<const char *>			appRequestedLayerNames;
 	
-	// 扩展列表
+	// 应用程序中所需要用到的扩展名称列表
 	std::vector<const char *>			appRequestedExtensionNames;
 	
 	// 层和相关的扩展列表
-	std::vector<LayerProperties>		layerPropertyList;
+	std::vector<LayerProperties>		        layerPropertyList;
 
 	// 全局层
 	VkResult getInstanceLayerProperties();
