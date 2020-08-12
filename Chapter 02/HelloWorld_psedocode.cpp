@@ -1,192 +1,167 @@
-/*
-* Learning Vulkan - ISBN: 9781786469809
-*
-* Author: Parminder Singh, parminder.vulkan@gmail.com
-* Linkedin: https://www.linkedin.com/in/parmindersingh18
-*
-* Permission is hereby granted, free of charge, to any person obtaining a
-* copy of this software and associated documentation files (the "Software"),
-* to deal in the Software without restriction, including without limitation
-* the rights to use, copy, modify, merge, publish, distribute, sublicense,
-* and/or sell copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included
-* in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-* DEALINGS IN THE SOFTWARE.
-*/
 
-/**************** 1. Enumerate Instance Layer properties ****************/
-// Get number of instance layers
+/**************** 1. 枚举实例的层属性 ****************/
+// 获得实例层的数量
 uint32_t instanceLayerCount;
 	
-// Use second parameter as NULL to return the layer count
+//设置第二个参数为 NULL 即可返回层的数量
 vkEnumerateInstanceLayerProperties(&instanceLayerCount, NULL); 
 
 VkLayerProperties *layerProperty = NULL;
 vkEnumerateInstanceLayerProperties(&instanceLayerCount, layerProperty);
 
-// Get the extensions for each available instance layer
+// 遍历每一个可用的实例层，获取功能扩展信息
 foreach  layerProperty{
 	VkExtensionProperties *instanceExtensions;
 	res = vkEnumerateInstanceExtensionProperties(layer_name, 
 			&instanceExtensionCount, instanceExtensions);
 }
 
-/**************** 2. Instance Creation ****************/
-VkInstance instance;	// Vulkan instance object
+/**************** 2. 创建实例 ****************/
+VkInstance instance;	// Vulkan 实例对象
 VkInstanceCreateInfo instanceInfo	 = {};
 
-// Specify layer and extensions names that needs to be enabled on instance.
+// 设置实例中需要开启的层的名称
 instanceInfo.ppEnabledLayerNames	 = {"VK_LAYER_LUNARG_standard_validation"};
 
-// Specify extensions that needs to be enabled on instance.
+// 设置实例中需要开启的功能扩展
 instanceInfo.ppEnabledExtensionNames = {VK_KHR_SURFACE_EXTENSION_NAME, 
 										VK_KHR_WIN32_SURFACE_EXTENSION_NAME};
 
-// Create the Instance	 object
+// 创建实例对象
 vkCreateInstance(&instanceInfo, NULL, &instance);
 
-/**************** 3. Enumerate physical devices ****************/
-VkPhysicalDevice				gpu;		// Physical device
-uint32_t						gpuCount;	// Pysical device count
-std::vector<VkPhysicalDevice>	gpuList;	// List of physical devices
-// Get number of GPU count
+/**************** 3. 枚举物理设备 ****************/
+VkPhysicalDevice				gpu;		// 物理设备对象
+uint32_t						gpuCount;	// 物理设备数量
+std::vector<VkPhysicalDevice>	gpuList;	// 物理设备列表
+// 获取物理设备的数量，也就是GPU的数量
 vkEnumeratePhysicalDevices(instance, &gpuCount, NULL);
 
-// Get GPU information
+// 获取所有物理设备，并存储到列表之中
 vkEnumeratePhysicalDevices(instance, &gpuCount, gpuList);
 
-/**************** 4. Create Device ****************/
-// Get Queue and Queue Type
+/**************** 4. 创建逻辑设备 ****************/
+// 获取设备队列和队列属性
 vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queueCount, queueProperties);
 
-// Get the memory properties from the physical device or GPU.
+// 获取物理设备或GPU的内存属性
 vkGetPhysicalDeviceMemoryProperties(gpu, &memoryProperties);
 
-//Get the physical device or GPU properties
+// 获取物理设备或GPU的属性
 vkGetPhysicalDeviceProperties(gpu, &gpuProps);
 
-// Create the logical device object from physical device
-VkDevice			device;	// Logical device
+// 从物理设备创建逻辑设备
+VkDevice			device;	// 逻辑设备对象
 VkDeviceCreateInfo	deviceInfo = {};
 vkCreateDevice(gpuList[0], &deviceInfo, NULL, &device);
 
-/**************** 5. Presentation Initialization ****************/
+/**************** 5. 显示初始化 ****************/
 // 
-// Creat empty Window
-CreateWindowEx(...);		/*Windows*/
-xcb_create_window(...); 	/*Linux*/
+// 创建空窗口
+CreateWindowEx(...);		/*Windows平台*/
+xcb_create_window(...); 	/*Linux平台*/
 
-// Query WSI extensions,store as function pointers. For example:
+// 查询WSI扩展并保存为函数指针。例如：
 // vkCreateSwapchainKHR, vkCreateSwapchainKHR .....
 
-// Create abstract surface object
+// 创建抽象表面对象
 VkWin32SurfaceCreateInfoKHR createInfo = {};
 vkCreateWin32SurfaceKHR(instance, &createInfo, NULL, &surface);
 
-// Among all queues select a queue which supports presentation
+// 选择一个支持显示的队列
 foreach Queue in All Queues{
 	vkGetPhysicalDeviceSurfaceSupportKHR(gpu, queueIndex, surface, &isPresentaionSupported);
-	// Store this queue index
+	// 存储显示队列的索引
 	if (isPresentaionSupported) {
 		graphicsQueueFamilyIndex = Queue.index;
 		break;
 	}
 }
 
-// Acquire compatible queue supporting presentation 
-// and is a graphics queue
+// 获取兼容显示层的队列，同时也是一个图形队列
 vkGetDeviceQueue(device, graphicsQueueFamilyIndex, 0, &queue);
 
-// allocate memory for total format count
+// 分配内存空间用来记录绘制表面的格式总数
 uint32_t formatCount;
 vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, NULL);
 
 VkSurfaceFormatKHR *surfaceFormats = allocate memory('formatCount' * VkSurfaceFormatKHR);
 
-// Grab the surface format into VkSurfaceFormatKHR objects
+// 保存表面格式到 VkSurfaceFormatKHR 对象中
 vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, surfaceFormats);
 
-/**************** 6. Creating Swapchain ****************/
+/**************** 6. 创建交换链 ****************/
 
-//Start recording commands into command buffer
+//开始将指令记录到指令缓存中
 vkBeginCommandBuffer(cmd, &cmdBufInfo);
 
-// Getting surface capabilities
+// 获取表面性能参数
 vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &surfCapabilities);
 		
-// Getting surface presentation modes
+// 获取表面显示模式
 vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &presentModeCount, NULL);
 VkPresentModeKHR presentModes[presentModeCount];
 vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &presentModeCount, presentModes);
 		
-// Creating the Swapchain
+// 创建交换链
 VkSwapchainCreateInfoKHR swapChainInfo = {};
 vkCreateSwapchainKHR(device, &swapChainInfo, NULL, &swapChain);
 		
-// Retrieve the Swapchain images
+// 创建交换链图像对应的图像视图
 vkGetSwapchainImagesKHR(device, swapChain, &swapchainImageCount, NULL);
 VkImage swapchainImages[swapchainImageCount];
 vkGetSwapchainImagesKHR(device, swapChain, &swapchainImageCount, swapchainImages);
 		
-// Retrieve the Swapchain images
+// 获取交换链中的图像
 foreach swapchainImages{
-	// Set the implementation compatible layout
+	// 设置布局方式，与具体驱动的实现兼容
 	SetImageLayout();
 
-	// Insert pipeline barrier
+	// 插入流水线屏障
 	VkImageMemoryBarrier imgMemoryBarrier = { ... };
 	vkCmdPipelineBarrier(cmd,srcStages,destStages,0,0,NULL,0,NULL,1,&imgMemoryBarrier);
 
-	// Create the image view for the image object 
+	// 为每一个交换链图像创建图像视图
 	SwapChainBuffer scBuffer = {...};
 	VkImageViewCreateInfo colorImageView = {};
 	colorImageView.image = sc_buffer.image;
 	vkCreateImageView(device, &colorImageView, NULL, &scBuffer.view);
 
-	// Save the image view for application use
+	// 保存图像视图以供应用程序使用
 	buffers.push_back(scBuffer);
 }
 
-/**************** 7. Creating Depth buffer ****************/
+/**************** 7. 创建深度图像 ****************/
 
-// Query supported format features of the physical device
+// 查询当前物理设备所支持的格式
 vkGetPhysicalDeviceFormatProperties(gpuList, depthFormat, &properties);
 
-// Create image object
+// 创建图像对象
 vkCreateImage(device, &imageInfo, NULL, &imageObject);
 
-// Get the memory requirements for a image resource
+// 获取图像资源所需要的内存空间---物理设备侧
 vkGetImageMemoryRequirements(device, imageObject, &memRequirements);
 
-// Allocate memory
+// 分配内存--物理设备侧
 VkDeviceMemory	mem;
 vkAllocateMemory(device, &memAlloc, NULL, &mem);
 
-// Bind memory
+// 绑定内存
 vkBindImageMemory(device, imageObject, mem, 0);
 
-// Set the implementation compatible layout
+// 设置图像布局，可用于当前设备
 SetImageLayout(. . .)
 
-// Pipeline barrier
+// 插入新的流水线屏障，确保刚才设置的图像布局在图像被真正创建之前就已经创建了
 vkCmdPipelineBarrier(cmd, srcStages, destStages, 0, 0, NULL, 0, NULL, 1, &imgPipelineBarrier);
 
-// Create Image View from created depth buffer object 
+// 创建深度图像视图
 VkImageViewCreateInfo imgViewInfo = { ... };
 imgViewInfo.image = imageObject;
 vkCreateImageView(device, &imgViewInfo, NULL, &view);
 
 
-/**************** 8. Building shader module ****************/
+/**************** 8. 构建着色器 ****************/
 #version 450
 layout (location = 0) in vec4 pos;
 layout (location = 1) in vec4 inColor;
@@ -211,12 +186,12 @@ void main() {
 VkPipelineShaderStageCreateInfo vtxShdrStages = {....};
 VkShaderModuleCreateInfo moduleCreateInfo = { ... };
 moduleCreateInfo.pCode = spvVertexShaderData/*SPIRV form shader data*/;
-// Create Shader module on the device
+// 在物理设备端创建着色器木块
 vkCreateShaderModule(device, &moduleCreateInfo, NULL, &vtxShdrStages.module);
 
-/**************** 9. Creating descriptor layout and pipeline layout ****************/
+/**************** 9. 创建描述符和流水线布局 ****************/
 
-// Descriptor layout specfies the type of information associated with shaders
+// 描述符的定义类型和着色器中是对应的
 VkDescriptorSetLayoutBinding layoutBindings[2];
 layoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 layoutBindings[0].binding		 = 0;
@@ -225,21 +200,21 @@ layoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 layoutBindings[1].binding		 = 0;
 layoutBindings[1].stageFlags     = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-// Use layout bindings and create a descriptor set layout
+// 设置布局绑定，创建描述符
 VkDescriptorSetLayoutCreateInfo descriptorLayout = {};
 descriptorLayout.pBindings					     = layoutBindings;
 VkDescriptorSetLayout descLayout[2];
 vkCreateDescriptorSetLayout(device, &descriptorLayout, NULL, descLayout.data());
 
-// Now use the descriptor layout to create a pipeline layout
+// 使用描述符创建流水线布局
 VkPipelineLayoutCreateInfo pipelineLayoutCI = { ... };
 pipelineLayoutCI.pSetLayouts				= descLayout.data();
 vkCreatePipelineLayout(device, &pipelineLayoutCI, NULL, &pipelineLayout);
 
 
-/**************** 10. Render Pass ****************/
+/**************** 10. 渲染通道 ****************/
 
-// Define two attachment for color and depth buffer
+// 定义两个附件，分别对应颜色和深度缓存
 VkAttachmentDescription attachments[2];
 attachments[0].format = colorImageformat;
 attachments[0].loadOp = clear ? VK_ATTACHMENT_LOAD_OP_CLEAR 
@@ -249,38 +224,36 @@ attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 
 VkAttachmentReference colorReference, depthReference = {...};
 
-// Describe the subpass, use color image and depth image
+// 使用颜色图像和深度图像创建子通道
 VkSubpassDescription subpass	= {};
 subpass.pColorAttachments		= &colorReference;
 subpass.pDepthStencilAttachment = &depthReference;
 
-// Define RenderPass control structure
+// 定义渲染通道控制的结构体
 VkRenderPassCreateInfo rpInfo	= { &attachments,&subpass ...};
 
-VkRenderPass renderPass; // Create Render Pass object
+VkRenderPass renderPass; // 创建渲染通道对象
 vkCreateRenderPass(device, &rpInfo, NULL, &renderPass);
 
-/**************** 11. Creating Frame buffers ****************/
-VkImageView attachments[2];						// [0] for color, [1] for depth
+/**************** 11. 创建帧缓存 ****************/
+VkImageView attachments[2];						// [0]表示颜色, [1]表示深度
 attachments[1] = Depth.view;
 
 VkFramebufferCreateInfo fbInfo = {};
-fbInfo.renderPass				= renderPass;	// Pass render buffer object
-fbInfo.pAttachments				= attachments;	// Image view attachments
-fbInfo.width					= width;		// Frame buffer width
-fbInfo.height					= height;		// Frame buffer height
+fbInfo.renderPass				= renderPass;	// 渲染通道对象
+fbInfo.pAttachments				= attachments;	// 图像视图附件
+fbInfo.width					= width;		// 帧缓存宽度
+fbInfo.height					= height;		// 帧缓存高度
 
-// Allocate memory for frame buffer objects, for each image
-// in the swapchain, there is one frame buffer For each respective 
-// drawing surface there is one frame buffer  
-VkFramebuffer framebuffers[number of draw surface image in swap chain];
+// 为交换链中的每幅图像的帧缓存对象分配内存，每幅图像只有一个帧缓存
+VkFramebuffer framebuffers[交换链中的绘制图像数量];
 
 foreach(drawing buffer in swapchain) {
 	attachments[0] = currentSwapChainDrawImage.view;
 	vkCreateFramebuffer(device, &fbInfo, NULL, &framebuffers[i]);
 }
 
-/****************  12. Populate Geometry storing vertex into GPU memory ****************/
+/****************  12. 产生几何体，在GPU中保存顶点数据 ****************/
 
 static const VertexWithColor triangleData[] = {
 	/*{  x ,     y,    z,    w,    r,    g,    b,   a },*/
@@ -293,7 +266,7 @@ VkBuffer				buffer;
 VkMemoryRequirements	mem_requirement;
 VkDeviceMemory			deviceMemory;
 
-// Create buffer object, query required memory, allocate
+// 创建缓存对象，查询所需要的内存空间，分配内存
 VkBufferCreateInfo buffer_info = { ... };
 vkCreateBuffer(device, &buffer_info, NULL, &buffer);
 
@@ -303,20 +276,20 @@ VkMemoryAllocateInfo alloc_info = { ... };
 
 vkAllocateMemory(device, &alloc_info, NULL, &(deviceMemory));
 
-// Copy the triangleData to GPU using mapping and unmapping.
+// 通过映射的方式将三角型数据复制到GPU侧
 uint8_t *pData;
 vkMapMemory(device, deviceMemory, 0, mem_requirement.size, 0, &pData);
-memcpy(pData, triangleData, dataSize); /**** Copying data ****/
+memcpy(pData, triangleData, dataSize); /**** 拷贝数据：void *memcpy(void *dst, void *src, unsigned n); ****/
 vkUnmapMemory(device, deviceMemory);
 
-// Bind the memory
+// 绑定分配后的数据
 vkBindBufferMemory(device, buffer, deviceMemory, 0);
 
-/****************  13. Vertex binding ****************/
+/****************  13. 顶点绑定 ****************/
 VkVertexInputBindingDescription viBinding;
 viBinding.binding = 0;
 viBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-viBinding.stride = sizeof(triangleData) /*data Stride*/;
+viBinding.stride = sizeof(triangleData) /* 数据间隔 */;
 
 VkVertexInputAttributeDescription viAttribs[2];
 viAttribs[0].binding = 0;
@@ -328,37 +301,44 @@ viAttribs[1].location = 1;
 viAttribs[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
 viAttribs[1].offset = 16;
 
-/****************  14. Defining states ****************/
-// Vertex Input state
+/****************  14. 定义状态 ****************/
+// 顶点输入状态
 VkPipelineVertexInputStateCreateInfo vertexInputStateInfo	= { ... };
 vertexInputStateInfo.vertexBindingDescriptionCount			= 1;
 vertexInputStateInfo.pVertexBindingDescriptions				= &viBinding;
 vertexInputStateInfo.vertexAttributeDescriptionCount		= 2;
 vertexInputStateInfo.pVertexAttributeDescriptions			= viAttribs;
 
-// Dynamic states
+// 动态状态
 VkPipelineDynamicStateCreateInfo dynamicState				= { ... };
-// Input assembly state control structure
+
+// 输入组装状态控制结构体
 VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo	= { ... };
-// Rasterization state control structure
+
+// 光栅化状态控制结构体
 VkPipelineRasterizationStateCreateInfo rasterStateInfo		= { ... };
-// Color blend Attachment state control structure
+
+// 颜色混合附件状态控制结构体
 VkPipelineColorBlendAttachmentState colorBlendSI			= { ... };
-// Color blend state control structure
+
+// 颜色混合状态控制结构体
 VkPipelineColorBlendStateCreateInfo colorBlendStateInfo		= { ... };
-// View port state control structure
+
+// 视口状态控制结构体
 VkPipelineViewportStateCreateInfo viewportStateInfo			= { ... };
-// Depth stencil state control structure
+
+// 深度模板状态控制结构体
 VkPipelineDepthStencilStateCreateInfo depthStencilStateInfo = { ... };
-// Multi sampling state control structure
+
+// 多重采样状态控制结构体
 VkPipelineMultisampleStateCreateInfo   multiSampleStateInfo = { ... };
 
-/****************  15. Creating Graphics Pipeline ****************/
+/****************  15. 创建图形管线 ****************/
 VkPipelineCache	pipelineCache; 
 VkPipelineCacheCreateInfo pipelineCacheInfo;
 vkCreatePipelineCache(device, &pipelineCacheInfo, NULL, &pipelineCache);
 
-// Define the control structure of graphics pipeline 
+// 定义图形管线的控制参数结构体
 VkGraphicsPipelineCreateInfo pipelineInfo;
 pipelineInfo.layout					= pipelineLayout;
 pipelineInfo.pVertexInputState		= &vertexInputStateInfo;
@@ -373,32 +353,32 @@ pipelineInfo.pStages				= shaderStages;
 pipelineInfo.stageCount				= 2;
 pipelineInfo.renderPass				= renderPass;
 
-// Create graphics pipeline
+// 创建图像管线
 vkCreateGraphicsPipelines(device, pipelineCache, 1, &pipelineInfo, NULL, &pipeline);
 
-/****************  16. Acquiring drawing image ****************/
+/****************  16. 获取渲染图像 ****************/
 
-// Define semaphore for synchronizing the acquire of draw image.
-// Only acquire draw image when drawing is completed
+// 定义图像获取操作的同步信号量
+// 只有绘制完成后，我们才可以获取绘制图像
 VkSemaphore imageAcquiredSemaphore ;
 VkSemaphoreCreateInfo imageAcquiredSemaphore CreateInfo = { ... };
 imageAcquiredSemaphore CreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 vkCreateSemaphore(device, &imageAcquiredSemaphoreCreateInfo,
 					NULL, &imageAcquiredSemaphore );
 
-// Get the index of the next available swapchain image:
+// 获取下一个可用的交换链图像的索引号
 vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, 
 						imageAcquiredSemaphore , NULL, &currentSwapChainImageIndex);
 
-/****************  17. Preparing render pass control structure ****************/
+/****************  17. 准备渲染通道的控制结构体 ****************/
 
-// Define clear color value and depth stencil values
+// 定义清屏颜色以及深度模板值
 const VkClearValue clearValues[2] = {
 	[0] = { .color.float32 = { 0.2f, 0.2f, 0.2f, 0.2f } },
 	[1] = { .depthStencil = { 1.0f, 0 } },
 };
 
-// Render pass execution control structure for a given frame buffer
+// 帧缓存的渲染通道执行数据结构体
 VkRenderPassBeginInfo renderPassBegin;
 renderPassBegin.sType		= VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 renderPassBegin.pNext		= NULL;
@@ -412,34 +392,43 @@ renderPassBegin.clearValueCount				= 2;
 renderPassBegin.pClearValues				= clearValues;
 
 		
-/****************  18. Render pass execute ****************/
-/**** START RENDER PASS ****/
+/****************  18. 执行渲染通道 ****************/
+/**** 开始渲染通道 ****/
 vkCmdBeginRenderPass(cmd, &renderPassBegin, VK_SUBPASS_CONTENTS_INLINE); 
 		
-vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline); // Bind the pipeline
-const VkDeviceSize offsets[1] = { 0 };
-vkCmdBindVertexBuffers(cmd, 0, 1, &buffer, offsets);	 // Bind the triangle buffer data
-vkCmdSetViewport(cmd, 0, NUM_VIEWPORTS, &viewport); // viewport = {0, 0, 500, 500, 0 ,1}
-vkCmdSetScissor(cmd, 0, NUM_SCISSORS, &scissor);	 // scissor  = {0, 0, 500, 500}
-vkCmdDraw(cmd, 3, 1, 0, 0);			 // 3 vertices, 1 instance, 0th first index
+// 绑定图像管线
+vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
-/**** END RENDER PASS ****/
+// 绑定三角形缓存数据
+const VkDeviceSize offsets[1] = { 0 };
+vkCmdBindVertexBuffers(cmd, 0, 1, &buffer, offsets);
+
+// 设置视口
+vkCmdSetViewport(cmd, 0, NUM_VIEWPORTS, &viewport);
+
+// 设置裁切器
+vkCmdSetScissor(cmd, 0, NUM_SCISSORS, &scissor);
+
+// 绘制指令--3个顶点，1个实例，起始索引号0
+vkCmdDraw(cmd, 3, 1, 0, 0);
+
+/**** 结束渲染通道 ****/
 vkCmdEndRenderPass(cmd);
 
-// Insert pipeline barrier 
+// 设置交换链的图像布局
 setImageLayout()
 vkCmdPipelineBarrier(cmd, ....);
 
-/**** COMMAND BUFFER RECORDING ENDS HERE ****/
+/**** 结束指令缓存的录制 ****/
 vkEndCommandBuffer(cmd);
 
-/****************  19. Queue Submission ****************/
+/****************  19. 队列提交 ****************/
 
 VkFenceCreateInfo fenceInfo = { ... }; VkFence drawFence;
-// Create fence to determine completion of execution of submissions to queues
+// 创建指令屏障对象，以确保指令缓存的处理已经完成
 vkCreateFence(device, &fenceInfo, NULL, &drawFence);
 
-// Fill the command buffer submission control sturctures
+// 给指令缓存发送结构体赋值
 VkSubmitInfo submitInfo[1]			= { ... };
 submitInfo[0].pNext					= NULL;
 submitInfo[0].sType					= VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -447,12 +436,12 @@ submitInfo[0].pWaitSemaphores		= &imageAcquiredSemaphore ;
 submitInfo[0].commandBufferCount	= 1;
 submitInfo[0].pCommandBuffers		= &cmd;
 
-// Queue the command buffer for execution
+// 将指令缓存发送至队列中执行
 vkQueueSubmit(queue, 1, submitInfo, NULL);
 
-/****************  20. Present the draw result on the display window ****************/
+/****************  20. 使用显式层进行显示 ****************/
 
-// Define the presentation control structure
+// 定义显示的控制结构体
 VkPresentInfoKHR present = { ... };
 present.sType			 = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 present.pNext			 = NULL;
@@ -460,15 +449,14 @@ present.swapchainCount	 = 1;
 present.pSwapchains		 = &swapChain;
 present.pImageIndices	 = &swapChainObjCurrent_buffer;
 
-// Check if all the submitted command buffers are finished before displaying
+// 检查是不是之前发送的指令缓存都已经执行完毕
 do {
 	res = vkWaitForFences(device, 1, &drawFence, VK_TRUE, FENCE_TIMEOUT);
 } while (res == VK_TIMEOUT);
 
-// Handover the swapchain image to presentation queue
-// for presentation purposeRender to the display window
+// 将当前的交换链图像切换到显示队列，准备展示到输出设备
 vkQueuePresentKHR(queue, &present);
 
-// Destroy Synchronization objects
+// 删除同步对象
 vkDestroySemaphore(device, imageAcquiredSemaphore , NULL);
 vkDestroyFence(device, drawFence, NULL);
