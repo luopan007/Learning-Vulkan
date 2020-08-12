@@ -13,8 +13,8 @@ VulkanLayerAndExtension::~VulkanLayerAndExtension()
 VkResult VulkanLayerAndExtension::getInstanceLayerProperties()
 {
 	uint32_t						instanceLayerCount;		// 存储实例层的数目
-	std::vector<VkLayerProperties>	layerProperties;		// 通过向量数组存储层的属性
-	VkResult						result;					// 检查Vulkan API的执行结果
+	std::vector<VkLayerProperties>	                        layerProperties;		// 通过向量数组存储层的属性
+	VkResult						result;				// 检查Vulkan API的执行结果
 
 	// 查询所有的层
 	do {
@@ -101,8 +101,8 @@ VkResult VulkanLayerAndExtension::getDeviceExtensionProperties(VkPhysicalDevice*
 VkResult VulkanLayerAndExtension::getExtensionProperties(LayerProperties &layerProps, VkPhysicalDevice* gpu)
 {
 	uint32_t	extensionCount;								 // 保存每一层的扩展总数
-	VkResult	result;										 // 检查Vulkan API的执行结果
-	char*		layerName = layerProps.properties.layerName; // 层的名字
+	VkResult	result;								         // 检查Vulkan API的执行结果
+	char*		layerName = layerProps.properties.layerName;                             // 层的名字
 
 	do {
 		// 获取当前层中的扩展的总数
